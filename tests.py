@@ -13,7 +13,7 @@ METHOD = 'GET'
 ENDPOINT = 'endpoint'
 
 
-def start_response(status, response_headers):
+def start_response(status, response_headers, exc_info=None):
     '''start_response fake'''
 
 
@@ -27,7 +27,8 @@ class MicroDotsTest(unittest.TestCase):
         }
 
         def app(environ, start_response):
-            '''wsgi application fake'''
+            status = '200 OK'
+            start_response(status, {})
 
         self.microdot_app = Microdots(app, MICRODOT_SERVICE, MICRODOT_NAME)
 
@@ -54,6 +55,16 @@ class MicroDotsTest(unittest.TestCase):
         mock_post_request.side_effect = RequestException('error')
         self.microdot_app(self.environ, start_response)
         mock_error_logging.assert_called_with('error')
+
+    @patch('microdots.requests.post')
+    def test_do_not_send_request_when_response_fail(self, mock_post_request):
+        def app(environ, start_response):
+            status = '400'
+            start_response(status, {})
+
+        microdot_app = Microdots(app, MICRODOT_SERVICE, MICRODOT_NAME)
+        microdot_app(self.environ, start_response)
+        mock_post_request.assert_not_called()
 
 
 if __name__ == '__main__':
