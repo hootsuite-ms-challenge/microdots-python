@@ -1,6 +1,8 @@
 import unittest
 from unittest.mock import patch
 
+from requests.exceptions import RequestException
+
 from microdots import Microdots
 
 
@@ -45,6 +47,13 @@ class MicroDotsTest(unittest.TestCase):
         self.environ['HTTP_X_MICRODOT_ORIGIN'] = None
         self.microdot_app(self.environ, start_response)
         mock_post_request.assert_not_called()
+
+    @patch('microdots.logging.error')
+    @patch('microdots.requests.post')
+    def test_handle_exceptions_correctly(self, mock_post_request, mock_error_logging):
+        mock_post_request.side_effect = RequestException('error')
+        self.microdot_app(self.environ, start_response)
+        mock_error_logging.assert_called_with('error')
 
 
 if __name__ == '__main__':

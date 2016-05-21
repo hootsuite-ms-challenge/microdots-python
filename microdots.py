@@ -1,6 +1,8 @@
 import threading
+import logging
 
 import requests
+from requests.exceptions import RequestException
 
 
 class Microdots:
@@ -24,4 +26,7 @@ class Microdots:
 
 
     def send_request_to_microdot_service(self, data):
-        requests.post(self.microdot_service, data=data)
+        try:
+            requests.post(self.microdot_service, data=data)
+        except RequestException as ex:
+            logging.error(str(ex))
