@@ -1,6 +1,6 @@
 # Microdots Python
 
-    Middleware to WSGI applications
+Middleware to WSGI applications
 
 ## Setup project
 
