@@ -11,14 +11,15 @@ class Microdots:
         self.microdot_service = microdot_service
 
     def __call__(self, environ, start_response):
-        data = {
-            'origin': environ.get('HTTP_X_MICRODOT_ORIGIN'),
-            'target': self.microdot_name,
-            'method': environ.get('REQUEST_METHOD'),
-            'endpoint': environ.get('PATH_INFO')
-        }
-        t = threading.Thread(target=self.send_request_to_microdot_service, args=(data, ))
-        t.start()
+        if environ.get('HTTP_X_MICRODOT_ORIGIN'):
+            data = {
+                'origin': environ.get('HTTP_X_MICRODOT_ORIGIN'),
+                'target': self.microdot_name,
+                'method': environ.get('REQUEST_METHOD'),
+                'endpoint': environ.get('PATH_INFO')
+            }
+            t = threading.Thread(target=self.send_request_to_microdot_service, args=(data, ))
+            t.start()
         return self.application(environ, start_response)
 
 

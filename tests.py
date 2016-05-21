@@ -40,6 +40,12 @@ class MicroDotsTest(unittest.TestCase):
         }
         mock_post_request.assert_called_with(MICRODOT_SERVICE, data=data)
 
+    @patch('microdots.requests.post')
+    def test_do_not_send_request_if_header_X_MICRODOT_ORIGIN_it_was_not_set(self, mock_post_request):
+        self.environ['HTTP_X_MICRODOT_ORIGIN'] = None
+        self.microdot_app(self.environ, start_response)
+        mock_post_request.assert_not_called()
+
 
 if __name__ == '__main__':
     unittest.main()
