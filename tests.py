@@ -51,7 +51,7 @@ class MicroDotsTest(unittest.TestCase):
 
     @patch('microdots.logging.error')
     @patch('microdots.requests.post')
-    def test_handle_exceptions_correctly(self, mock_post_request, mock_error_logging):
+    def test_handle_exceptions_correctly_when_sending_request(self, mock_post_request, mock_error_logging):
         mock_post_request.side_effect = RequestException('error')
         self.microdot_app(self.environ, start_response)
         mock_error_logging.assert_called_with('error')
@@ -65,6 +65,16 @@ class MicroDotsTest(unittest.TestCase):
         microdot_app = Microdots(app, MICRODOT_SERVICE, MICRODOT_NAME)
         microdot_app(self.environ, start_response)
         mock_post_request.assert_not_called()
+
+    @patch('microdots.logging.error')
+    def test_handle_exceptions_correctly_when_checking_status(self, mock_error_logging):
+        def app(environ, start_response):
+            status = None
+            start_response(status, {})
+
+        microdot_app = Microdots(app, MICRODOT_SERVICE, MICRODOT_NAME)
+        microdot_app(self.environ, start_response)
+        assert mock_error_logging.called
 
 
 if __name__ == '__main__':

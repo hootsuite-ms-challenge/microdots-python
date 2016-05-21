@@ -15,17 +15,21 @@ class Microdots:
     def __call__(self, environ, start_response):
 
         def start_microdot(status, response_headers, exc_info=None):
-            if int(status[0]) in [2, 3]:
-                if environ.get('HTTP_X_MICRODOT_ORIGIN'):
-                    data = {
-                        'origin': environ.get('HTTP_X_MICRODOT_ORIGIN'),
-                        'target': self.microdot_name,
-                        'method': environ.get('REQUEST_METHOD'),
-                        'endpoint': environ.get('PATH_INFO')
-                    }
-                    t = threading.Thread(target=self.send_request_to_microdot_service, args=(data, ))
-                    t.start()
-            return start_response(status, response_headers, exc_info=None)
+            try:
+                if int(status[0]) in [2, 3]:
+                    if environ.get('HTTP_X_MICRODOT_ORIGIN'):
+                        data = {
+                            'origin': environ.get('HTTP_X_MICRODOT_ORIGIN'),
+                            'target': self.microdot_name,
+                            'method': environ.get('REQUEST_METHOD'),
+                            'endpoint': environ.get('PATH_INFO')
+                        }
+                        t = threading.Thread(target=self.send_request_to_microdot_service, args=(data, ))
+                        t.start()
+            except Exception as e:
+                logging.error(str(e))
+            finally:
+                return start_response(status, response_headers, exc_info=None)
 
         return self.application(environ, start_microdot)
 
@@ -33,5 +37,5 @@ class Microdots:
     def send_request_to_microdot_service(self, data):
         try:
             requests.post(self.microdot_service, data=data)
-        except RequestException as ex:
-            logging.error(str(ex))
+        except RequestException as e:
+            logging.error(str(e))
