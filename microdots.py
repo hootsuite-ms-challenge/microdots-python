@@ -7,10 +7,10 @@ from requests.exceptions import RequestException
 
 class Microdots:
 
-    def __init__(self, application, microdot_service, microdot_name):
+    def __init__(self, application, microdot_server, microdot_name):
         self.application = application
         self.microdot_name = microdot_name
-        self.microdot_service = microdot_service
+        self.microdot_server = microdot_server
 
     def __call__(self, environ, start_response):
 
@@ -24,7 +24,7 @@ class Microdots:
                             'method': environ.get('REQUEST_METHOD'),
                             'endpoint': environ.get('PATH_INFO')
                         }
-                        t = threading.Thread(target=self.send_request_to_microdot_service, args=(data, ))
+                        t = threading.Thread(target=self.send_request_to_microdot_server, args=(data, ))
                         t.start()
             except Exception as e:
                 logging.error(str(e))
@@ -34,8 +34,8 @@ class Microdots:
         return self.application(environ, start_microdot)
 
 
-    def send_request_to_microdot_service(self, data):
+    def send_request_to_microdot_server(self, data):
         try:
-            requests.post(self.microdot_service, data=data)
+            requests.post(self.microdot_server, data=data)
         except RequestException as e:
             logging.error(str(e))

@@ -7,7 +7,7 @@ from microdots import Microdots
 
 
 MICRODOT_NAME = 'Microdot target'
-MICRODOT_SERVICE = 'localhost:8000'
+MICRODOT_SERVER = 'localhost:8000'
 MICRODOT_ORIGIN = 'microdot origin'
 METHOD = 'GET'
 ENDPOINT = 'endpoint'
@@ -30,7 +30,7 @@ class MicroDotsTest(unittest.TestCase):
             status = '200 OK'
             start_response(status, {})
 
-        self.microdot_app = Microdots(app, MICRODOT_SERVICE, MICRODOT_NAME)
+        self.microdot_app = Microdots(app, MICRODOT_SERVER, MICRODOT_NAME)
 
     @patch('microdots.requests.post')
     def test_send_request_if_header_X_MICRODOT_ORIGIN_setted_correctly(self, mock_post_request):
@@ -41,7 +41,7 @@ class MicroDotsTest(unittest.TestCase):
             'method': METHOD,
             'endpoint': ENDPOINT,
         }
-        mock_post_request.assert_called_with(MICRODOT_SERVICE, data=data)
+        mock_post_request.assert_called_with(MICRODOT_SERVER, data=data)
 
     @patch('microdots.requests.post')
     def test_do_not_send_request_if_header_X_MICRODOT_ORIGIN_it_was_not_set(self, mock_post_request):
@@ -62,7 +62,7 @@ class MicroDotsTest(unittest.TestCase):
             status = '400'
             start_response(status, {})
 
-        microdot_app = Microdots(app, MICRODOT_SERVICE, MICRODOT_NAME)
+        microdot_app = Microdots(app, MICRODOT_SERVER, MICRODOT_NAME)
         microdot_app(self.environ, start_response)
         mock_post_request.assert_not_called()
 
@@ -72,7 +72,7 @@ class MicroDotsTest(unittest.TestCase):
             status = None
             start_response(status, {})
 
-        microdot_app = Microdots(app, MICRODOT_SERVICE, MICRODOT_NAME)
+        microdot_app = Microdots(app, MICRODOT_SERVER, MICRODOT_NAME)
         microdot_app(self.environ, start_response)
         assert mock_error_logging.called
 
